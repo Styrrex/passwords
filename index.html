@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Генератор паролей</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#5b3fb5">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Roboto+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{--h:265;color-scheme:light dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--pri:light-dark(hsl(var(--h) 55% 40%),hsl(var(--h) 90% 80%));
+--on-pri:light-dark(#fff,hsl(var(--h) 60% 18%));
+--pri-c:light-dark(hsl(var(--h) 85% 91%),hsl(var(--h) 35% 26%));
+--on-pri-c:light-dark(hsl(var(--h) 60% 15%),hsl(var(--h) 85% 91%));
+--bg:light-dark(hsl(var(--h) 30% 98%),hsl(var(--h) 15% 9%));
+--sc:light-dark(hsl(var(--h) 28% 94%),hsl(var(--h) 14% 14%));
+--sch:light-dark(hsl(var(--h) 25% 88%),hsl(var(--h) 13% 22%));
+--tx:light-dark(hsl(var(--h) 20% 12%),hsl(var(--h) 15% 90%));
+--tx2:light-dark(hsl(var(--h) 10% 38%),hsl(var(--h) 10% 72%));
+--ol:light-dark(hsl(var(--h) 12% 62%),hsl(var(--h) 10% 48%));
+--rc:28px;--rb:999px;--rw:16px;--rt:50%;
+--font:Roboto,system-ui,sans-serif;--mono:'Roboto Mono',ui-monospace,monospace}
+:root[data-mode=light]{color-scheme:light}
+:root[data-mode=dark]{color-scheme:dark}
+:root[data-style=classic]{--bg:light-dark(#efeeea,#141414);--sc:light-dark(#fbfbf9,#1d1d1d);--sch:light-dark(#e1e0db,#2e2e2c);--tx:light-dark(#1b1b1a,#e8e8e4);--tx2:light-dark(#66655f,#9a9992);--ol:light-dark(#b0afa8,#4a4944);--pri-c:light-dark(#e4e3de,#2b2b2a);--on-pri-c:var(--tx);--rc:2px;--rb:2px;--rw:2px;--rt:1px;--font:'IBM Plex Mono',ui-monospace,monospace;--mono:var(--font)}
+:root[data-style=classic] .card,:root[data-style=classic] .btn{border:1px solid var(--ol)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+html,body{height:100%;overflow:hidden}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 16px/1.45 var(--font);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;overscroll-behavior:none}
+input[type=text]{-webkit-user-select:text;user-select:text}
+#app{height:100%;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
+.top{display:flex;align-items:center;gap:12px;padding:14px 20px 10px;font-size:1.35rem;font-weight:500}
+.top b{display:grid;place-items:center;width:36px;height:36px;border-radius:var(--rw);background:var(--pri);color:var(--on-pri)}
+main{flex:1;overflow-y:auto;padding:8px 16px 16px;overscroll-behavior:contain}
+.scr{display:none}
+.scr.on{display:block;animation:in .22s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+nav{display:flex;background:var(--sc);padding:8px 8px 6px;border-top:1px solid color-mix(in srgb,var(--ol) 30%,transparent)}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--tx2);font:500 .78rem var(--font);cursor:pointer;padding:0}
+nav .ind{display:grid;place-items:center;padding:4px 20px;border-radius:var(--rb);transition:background .2s}
+nav button[aria-selected=true]{color:var(--tx)}
+nav button[aria-selected=true] .ind{background:var(--pri-c);color:var(--on-pri-c)}
+#splash{position:fixed;inset:0;z-index:9;background:var(--bg);display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;font-size:1.4rem;font-weight:500;transition:opacity .35s}
+#splash b{display:grid;place-items:center;width:88px;height:88px;border-radius:var(--rc);background:var(--pri);color:var(--on-pri)}
+h2{font-size:1rem;font-weight:500;color:var(--tx2);margin:0 0 12px}
+.card{background:var(--sc);border-radius:var(--rc);padding:20px;margin-bottom:16px}
+#out{background:var(--pri-c);color:var(--on-pri-c)}
+.pw{display:flex;align-items:center;gap:8px;padding:6px 0;font-family:var(--mono);font-size:1.1rem;word-break:break-all}
+.pw.big{font-size:1.55rem;line-height:1.35;padding:8px 0 14px}
+.pw span.t{flex:1}
+.d{color:light-dark(hsl(215 75% 38%),hsl(215 90% 76%))}
+.s{color:light-dark(hsl(12 75% 40%),hsl(20 90% 72%))}
+.ib{flex:none;background:none;border:0;color:inherit;padding:8px;border-radius:50%;cursor:pointer;display:grid}
+.ib:hover{background:color-mix(in srgb,currentColor 12%,transparent)}
+.bar{height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 18%,transparent);margin:6px 0 8px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;transition:width .25s,background .25s}
+#meta{margin:0 0 16px;font-size:.9rem}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font:500 1rem var(--font);padding:12px 22px;border:0;border-radius:var(--rb);cursor:pointer;flex:1}
+.pri{background:var(--pri);color:var(--on-pri)}
+.tonal{background:transparent;color:inherit;box-shadow:inset 0 0 0 1px currentColor}
+:root[data-style=classic] .tonal{box-shadow:none}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;cursor:pointer}
+.sw small{display:block;color:var(--tx2);font-size:.8rem}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;margin:0;width:52px;height:32px;border:2px solid var(--ol);border-radius:var(--rw);background:var(--sch);position:relative;cursor:pointer;transition:background .2s,border-color .2s}
+.sw input::after{content:"";position:absolute;top:50%;left:6px;width:16px;height:16px;margin-top:-8px;border-radius:var(--rt);background:var(--ol);transition:all .2s}
+.sw input:checked{background:var(--pri);border-color:var(--pri)}
+.sw input:checked::after{left:24px;width:24px;height:24px;margin-top:-12px;background:var(--on-pri)}
+.sw input:checked::after{left:22px}
+.len{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+input[type=range]{width:100%;accent-color:var(--pri);margin:4px 0 12px}
+input[type=number],input[type=text]{font:inherit;color:var(--tx);background:var(--sch);border:1px solid transparent;border-radius:calc(var(--rw) - 4px);padding:8px 12px;box-sizing:border-box}
+input[type=number]{width:84px;text-align:center}
+input[type=text]{width:100%;font-family:var(--mono)}
+label.f{display:block;margin-top:10px;font-size:.9rem;color:var(--tx2)}
+label.f input{margin-top:4px;color:var(--tx)}
+.seg{display:flex;border:1px solid var(--ol);border-radius:var(--rb);overflow:hidden;margin-bottom:12px}
+.seg button{flex:1;padding:10px 6px;border:0;background:none;color:var(--tx);font:inherit;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--pri-c);color:var(--on-pri-c);font-weight:500}
+.sws{display:flex;gap:10px;margin:4px 0 8px}
+.sws button{width:36px;height:36px;border-radius:var(--rt);border:0;cursor:pointer;outline-offset:3px}
+.sws button[aria-pressed=true]{outline:3px solid var(--tx)}
+.lbl{font-size:.9rem;color:var(--tx2);margin:4px 0}
+.by{text-align:center;color:var(--tx2);font-size:.85rem;margin:24px 0 0}
+button:focus-visible,input:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+#toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--tx);color:var(--bg);padding:10px 20px;border-radius:var(--rb);opacity:0;pointer-events:none;transition:all .25s}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="top"><b><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></b>Пароли</div>
+<main>
+<div class="scr on" id="s0">
+<section class="card" id="out">
+<div id="list"></div>
+<div class="bar"><i id="fill"></i></div>
+<p id="meta"></p>
+<div class="row">
+<button class="btn pri" id="gen">Сгенерировать</button>
+<button class="btn tonal" id="copy">Копировать</button>
+</div>
+</section>
+
+<section class="card">
+<div class="len"><span>Длина</span><input type="number" data-k="len" min="4" max="128" aria-label="Длина пароля"></div>
+<input type="range" data-k="len" min="4" max="128" aria-label="Длина пароля">
+</section>
+</div>
+<div class="scr" id="s1">
+<section class="card">
+<h2>Что включить</h2>
+<label class="sw"><span>Заглавные буквы<small>A–Z</small></span><input type="checkbox" data-k="upper"></label>
+<label class="sw"><span>Строчные буквы<small>a–z</small></span><input type="checkbox" data-k="lower"></label>
+<label class="sw"><span>Цифры<small>0–9</small></span><input type="checkbox" data-k="digits"></label>
+<label class="sw"><span>Спецсимволы<small>набор настраивается ниже</small></span><input type="checkbox" data-k="symbols"></label>
+<label class="f">Набор спецсимволов<input type="text" data-k="custom" spellcheck="false"></label>
+<label class="f">Исключить символы<input type="text" data-k="exclude" spellcheck="false" placeholder="например: &lt;&gt;&quot;'"></label>
+<div style="margin-top:12px">
+<label class="sw"><span>Без похожих символов<small>i l 1 L o 0 O I |</small></span><input type="checkbox" data-k="noSim"></label>
+<label class="sw"><span>Без повторов<small>каждый символ не более одного раза</small></span><input type="checkbox" data-k="noRep"></label>
+<label class="sw"><span>По одному символу из каждого набора</span><input type="checkbox" data-k="each"></label>
+<label class="sw"><span>Начинать с буквы</span><input type="checkbox" data-k="startL"></label>
+</div>
+<div class="len" style="margin-top:8px"><span>Сколько паролей</span><input type="number" data-k="count" min="1" max="10" aria-label="Количество паролей"></div>
+</section>
+
+</div>
+<div class="scr" id="s2">
+<section class="card">
+<h2>Оформление</h2>
+<label class="sw"><span>Стиль Material 3<small>выключите для классического вида</small></span><input type="checkbox" data-k="m3" data-d></label>
+<div class="lbl">Тема</div>
+<div class="seg" id="theme">
+<button data-v="auto">Авто</button><button data-v="light">Светлая</button><button data-v="dark">Тёмная</button>
+</div>
+<div class="lbl">Цвет акцента</div>
+<div class="sws" id="hues"></div>
+<label class="sw"><span>Раскрашивать символы<small>цифры и знаки выделяются цветом</small></span><input type="checkbox" data-k="color" data-d></label>
+</section>
+<p class="by">Создатель: @styrrex</p>
+</div>
+</main>
+<nav>
+<button data-s="s0" aria-selected="true"><span class="ind"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></span>Генератор</button>
+<button data-s="s1" aria-selected="false"><span class="ind"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg></span>Параметры</button>
+<button data-s="s2" aria-selected="false"><span class="ind"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4c2.8 0 5-2.2 5-5 0-4.4-4-8-9.4-8zM6.5 12a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg></span>Оформление</button>
+</nav>
+</div>
+<div id="splash"><b><svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M12.65 10A5.99 5.99 0 0 0 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6a5.99 5.99 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></b>Пароли</div>
+<div id="toast" role="status"></div>
+
+<script>
+const D={len:16,upper:true,lower:true,digits:true,symbols:true,custom:'!@#$%^&*()-_=+[]{};:,.?',exclude:'',noSim:false,noRep:false,each:true,startL:false,count:1,m3:true,theme:'auto',hue:265,color:true};
+let S={...D},list=[],info={};
+try{Object.assign(S,JSON.parse(localStorage.getItem('pg')||'{}'))}catch(e){}
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const save=()=>{try{localStorage.setItem('pg',JSON.stringify(S))}catch(e){}};
+const esc=c=>c.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function rnd(n){const a=new Uint32Array(1),lim=Math.floor(2**32/n)*n;let x;do{crypto.getRandomValues(a);x=a[0]}while(x>=lim);return x%n}
+
+function pools(){
+  const ex=new Set([...S.exclude]),bad=/[il1Lo0OI|]/;
+  const src=[];
+  if(S.upper)src.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  if(S.lower)src.push('abcdefghijklmnopqrstuvwxyz');
+  if(S.digits)src.push('0123456789');
+  if(S.symbols)src.push(S.custom);
+  return src.map(p=>[...new Set([...p])].filter(c=>!ex.has(c)&&!(S.noSim&&bad.test(c)))).filter(p=>p.length);
+}
+
+function one(P,all,n){
+  const used=new Set();
+  const pick=a=>{const b=S.noRep?a.filter(c=>!used.has(c)):a;if(!b.length)return null;const c=b[rnd(b.length)];used.add(c);return c};
+  const out=[];
+  if(S.each&&n>=P.length)P.forEach(p=>{const c=pick(p);if(c)out.push(c)});
+  while(out.length<n){const c=pick(all);if(!c)break;out.push(c)}
+  for(let i=out.length-1;i>0;i--){const j=rnd(i+1);[out[i],out[j]]=[out[j],out[i]]}
+  if(S.startL){const i=out.findIndex(c=>/[A-Za-z]/.test(c));if(i>0)[out[0],out[i]]=[out[i],out[0]]}
+  return out.join('');
+}
+
+function gen(){
+  const P=pools();
+  if(!P.length)return{list:[],err:'Выберите хотя бы один набор символов.'};
+  const all=[...new Set(P.flat())];
+  let n=S.len,note='';
+  if(S.noRep&&n>all.length){n=all.length;note=' Длина уменьшена до '+n+': без повторов не хватает символов.'}
+  const l=[];for(let i=0;i<S.count;i++)l.push(one(P,all,n));
+  return{list:l,bits:Math.round(n*Math.log2(all.length)),note};
+}
+
+function paint(){
+  const r=document.documentElement;
+  r.dataset.style=S.m3?'m3':'classic';r.dataset.mode=S.theme;r.style.colorScheme=S.theme==='auto'?'light dark':S.theme;r.style.setProperty('--h',S.hue);
+  $$('#theme button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===S.theme));
+  $$('#hues button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.h===S.hue));
+  const L=$('#list');
+  if(info.err){L.innerHTML='<p>'+info.err+'</p>';$('#fill').style.width='0';$('#meta').textContent='';return}
+  const cp='<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>';
+  L.innerHTML=list.map((p,i)=>'<div class="pw'+(list.length==1?' big':'')+'"><span class="t">'+[...p].map(c=>{const k=!S.color?'':/\d/.test(c)?'d':/[A-Za-z]/.test(c)?'':'s';return k?'<span class="'+k+'">'+esc(c)+'</span>':esc(c)}).join('')+'</span><button class="ib" data-i="'+i+'" aria-label="Копировать пароль">'+cp+'</button></div>').join('');
+  const b=info.bits,lab=b<40?'слабый':b<60?'средний':b<80?'хороший':'отличный';
+  const f=$('#fill');f.style.width=Math.min(100,b/128*100)+'%';f.style.background='hsl('+Math.min(120,b/100*120)+' 70% 45%)';
+  $('#meta').textContent='Надёжность: '+lab+', около '+b+' бит.'+info.note;
+}
+
+function run(){info=gen();list=info.list;paint()}
+
+function sync(skip){
+  $$('[data-k]').forEach(el=>{if(el===skip)return;const v=S[el.dataset.k];el.type==='checkbox'?el.checked=v:el.value=v});
+}
+
+$$('[data-k]').forEach(el=>el.addEventListener('input',()=>{
+  const k=el.dataset.k;
+  if(el.type==='checkbox')S[k]=el.checked;
+  else if(el.type==='text')S[k]=el.value;
+  else{const lim=k==='len'?[4,128]:[1,10];S[k]=Math.min(lim[1],Math.max(lim[0],Math.round(+el.value)||D[k]))}
+  save();sync(el);
+  el.hasAttribute('data-d')?paint():run();
+}));
+
+$$('#theme button').forEach(b=>b.onclick=()=>{S.theme=b.dataset.v;save();paint()});
+[265,200,150,40,340,0].forEach(h=>{
+  const b=document.createElement('button');b.dataset.h=h;b.setAttribute('aria-label','Цвет акцента');
+  b.style.background='hsl('+h+' 60% 50%)';b.onclick=()=>{S.hue=h;save();paint()};$('#hues').append(b);
+});
+
+function toast(t){try{navigator.vibrate(12)}catch(e){}const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1600)}
+async function copy(t){
+  try{await navigator.clipboard.writeText(t)}
+  catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();try{document.execCommand('copy')}catch(x){}a.remove()}
+  toast('Скопировано');
+}
+$('#gen').onclick=run;
+$('#copy').onclick=()=>list.length&&copy(list.join('\n'));
+$('#list').onclick=e=>{const b=e.target.closest('.ib');if(b)copy(list[+b.dataset.i])};
+
+$$('nav button').forEach(b=>b.onclick=()=>{$$('nav button').forEach(x=>x.setAttribute('aria-selected',x===b));$$('.scr').forEach(s=>s.classList.toggle('on',s.id===b.dataset.s));$('main').scrollTop=0;try{navigator.vibrate(8)}catch(e){}});
+document.addEventListener('contextmenu',e=>{if(e.target.type!=='text')e.preventDefault()});
+setTimeout(()=>{const p=$('#splash');p.style.opacity=0;setTimeout(()=>p.remove(),400)},700);
+sync();run();
+</script>
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
+</body>
+</html>
